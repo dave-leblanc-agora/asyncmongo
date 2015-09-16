@@ -21,9 +21,9 @@ import logging
 from types import NoneType
 import functools
 
-from errors import ProgrammingError, IntegrityError, InterfaceError
-import helpers
-import asyncjobs
+from .errors import ProgrammingError, IntegrityError, InterfaceError
+from . import helpers
+from . import asyncjobs
 
 
 class Connection(object):
@@ -54,8 +54,8 @@ class Connection(object):
                  secondary_only=False,
                  **kwargs):
         assert isinstance(autoreconnect, bool)
-        assert isinstance(dbuser, (str, unicode, NoneType))
-        assert isinstance(dbpass, (str, unicode, NoneType))
+        assert isinstance(dbuser, (str, NoneType))
+        assert isinstance(dbpass, (str, NoneType))
         assert isinstance(rs, (str, NoneType))
         assert pool
         assert isinstance(secondary_only, bool)
@@ -65,7 +65,7 @@ class Connection(object):
             assert port is None
             assert isinstance(seed, (set, list))
         else:
-            assert isinstance(host, (str, unicode))
+            assert isinstance(host, str)
             assert isinstance(port, int)
             assert seed is None
         
@@ -117,7 +117,7 @@ class Connection(object):
             self.__stream = self.__backend.register_stream(s, **self.__kwargs)
             self.__stream.set_close_callback(self._socket_close)
             self.__alive = True
-        except socket.error, error:
+        except socket.error as error:
             raise InterfaceError(error)
     
     def _socket_close(self):
@@ -245,7 +245,7 @@ class Connection(object):
 
         try:
             response = helpers._unpack_response(response, request_id) # TODO: pass tz_awar
-        except Exception, e:
+        except Exception as e:
             logging.debug('error %s' % e)
             callback(None, e)
             return

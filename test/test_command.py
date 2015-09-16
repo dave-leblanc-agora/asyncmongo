@@ -1,6 +1,6 @@
 import tornado.ioloop
 
-import test_shunt
+from . import test_shunt
 import asyncmongo
 
 
@@ -21,7 +21,7 @@ class CommandTest(
 
         def callback(response, error):
             tornado.ioloop.IOLoop.instance().stop()
-            self.assert_(error is None)
+            self.assertTrue(error is None)
             results.append(response['value'])
 
         before = self.get_open_cursors()

@@ -2,7 +2,7 @@ import tornado.ioloop
 import logging
 import time
 
-import test_shunt
+from . import test_shunt
 import asyncmongo
 from asyncmongo.errors import DataError
 
@@ -11,7 +11,7 @@ TEST_TIMESTAMP = int(time.time())
 class ConnectionTest(test_shunt.MongoTest):
     def test_getitem(self):
         db = asyncmongo.Client(pool_id='test_query', host='127.0.0.1', port=27018, dbname='test', mincached=3)
-        self.assert_(
+        self.assertTrue(
             repr(db['foo']) == repr(db.foo),
             "dict-style access of a collection should be same as property access"
         )

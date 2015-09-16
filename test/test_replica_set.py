@@ -3,7 +3,7 @@ import time
 import logging
 import subprocess
 
-import test_shunt
+from . import test_shunt
 import asyncmongo
 import asyncmongo.connection
 
@@ -86,7 +86,7 @@ class ReplicaSetTest(test_shunt.MongoTest):
                 tornado.ioloop.IOLoop.instance().stop()
 
         try:
-            for i in xrange(10):
+            for i in range(10):
                 conn = asyncmongo.connection.Connection(pool=Pool(),
                                                         seed=[('127.0.0.1', 27018), ('127.0.0.1', 27020)],
                                                         rs="rs0")
@@ -98,7 +98,7 @@ class ReplicaSetTest(test_shunt.MongoTest):
                 assert conn._host == '127.0.0.1'
                 assert conn._port == 27019
 
-            for i in xrange(10):
+            for i in range(10):
                 conn = asyncmongo.connection.Connection(pool=Pool(),
                                                         seed=[('127.0.0.1', 27018), ('127.0.0.1', 27020)],
                                                         rs="rs0", secondary_only=True)

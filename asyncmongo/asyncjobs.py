@@ -26,9 +26,9 @@ import logging
 import random
 from bson import SON
 
-import message
-import helpers
-from errors import AuthenticationError, RSConnectionError, InterfaceError
+from . import message
+from . import helpers
+from .errors import AuthenticationError, RSConnectionError, InterfaceError
 
 
 class AsyncMessage(object):
@@ -41,7 +41,7 @@ class AsyncMessage(object):
     def process(self, *args, **kwargs):
         try:
             self.connection._send_message(self.message, self.callback)
-        except Exception, e:
+        except Exception as e:
             if self.callback is None:
                 logging.error("Error occurred in safe update mode: %s", e)
             else:
@@ -99,7 +99,7 @@ class AuthorizeJob(AsyncJob):
                 nonce = response['data'][0]['nonce']
                 logging.debug("Nonce received: %r", nonce)
                 key = helpers._auth_key(nonce, self.dbuser, self.dbpass)
-            except Exception, e:
+            except Exception as e:
                 self._error(AuthenticationError(e))
                 return
 
@@ -120,7 +120,7 @@ class AuthorizeJob(AsyncJob):
             try:
                 assert response['number_returned'] == 1
                 response = response['data'][0]
-            except Exception, e:
+            except Exception as e:
                 self._error(AuthenticationError(e))
                 return
 
@@ -175,7 +175,7 @@ class ConnectRSJob(AsyncJob):
                 try:
                     self.connection._socket_connect()
                     logging.debug("Connected to %s", h)
-                except InterfaceError, e:
+                except InterfaceError as e:
                     logging.error("Failed to connect to the host: %s", e)
                 else:
                     break
@@ -200,7 +200,7 @@ class ConnectRSJob(AsyncJob):
             try:
                 assert len(response["data"]) == 1
                 res = response["data"][0]
-            except Exception, e:
+            except Exception as e:
                 self._error(RSConnectionError("Invalid response data: %r" % response.get("data")))
                 return
 
@@ -232,7 +232,7 @@ class ConnectRSJob(AsyncJob):
                         self._primary = helpers._parse_host(primary)
                     self._state = "seed"
                     self.process()
-            except Exception, e:
+            except Exception as e:
                 self._error(RSConnectionError(e))
                 return
 

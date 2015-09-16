@@ -49,7 +49,7 @@ class MongoTest(unittest.TestCase):
             tornado.ioloop.IOLoop._instance = self.loop
         else:
             self.loop = tornado.ioloop.IOLoop.instance()
-            self.assert_(
+            self.assertTrue(
                 isinstance(self.loop, PuritanicalIOLoop),
                 "Couldn't install IOLoop"
             )
