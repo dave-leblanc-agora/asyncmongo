@@ -1,5 +1,5 @@
 #!/bin/env python
-# 
+#
 # Copyright 2010 bit.ly
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -21,11 +21,12 @@ http://github.com/bitly/asyncmongo
 try:
     import bson
 except ImportError:
-    raise ImportError("bson library not installed. Install pymongo >= 1.9 https://github.com/mongodb/mongo-python-driver")
+    raise ImportError(
+        "bson library not installed. Install pymongo >= 1.9 https://github.com/mongodb/mongo-python-driver")
 
 # also update in setup.py
-version = "1.3"
-version_info = (1, 3)
+version = "2.0"
+version_info = (2, 0)
 
 ASCENDING = 1
 """Ascending sort order."""
@@ -35,6 +36,6 @@ GEO2D = "2d"
 """Index specifier for a 2-dimensional `geospatial index`"""
 
 from .errors import (Error, InterfaceError, AuthenticationError, DatabaseError, RSConnectionError,
-                    DataError, IntegrityError, ProgrammingError, NotSupportedError)
+                     DataError, IntegrityError, ProgrammingError, NotSupportedError)
 
 from .client import Client
