@@ -1,5 +1,5 @@
 #!/bin/env python
-# 
+#
 # Copyright 2010 bit.ly
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -18,12 +18,13 @@ import sys
 import socket
 import struct
 import logging
-from types import NoneType
 import functools
 
 from .errors import ProgrammingError, IntegrityError, InterfaceError
 from . import helpers
 from . import asyncjobs
+
+NoneType = type(None)
 
 
 class Connection(object):
@@ -41,6 +42,7 @@ class Connection(object):
       - `**kwargs`: passed to `backends.AsyncBackend.register_stream`
 
     """
+
     def __init__(self,
                  host=None,
                  port=None,
@@ -59,7 +61,7 @@ class Connection(object):
         assert isinstance(rs, (str, NoneType))
         assert pool
         assert isinstance(secondary_only, bool)
-        
+
         if rs:
             assert host is None
             assert port is None
@@ -68,7 +70,7 @@ class Connection(object):
             assert isinstance(host, str)
             assert isinstance(port, int)
             assert seed is None
-        
+
         self._host = host
         self._port = port
         self.__rs = rs
@@ -95,7 +97,7 @@ class Connection(object):
         __import__('asyncmongo.backends.%s_backend' % name)
         mod = sys.modules['asyncmongo.backends.%s_backend' % name]
         return mod.AsyncBackend()
-    
+
     def __connect(self, err_callback):
         # The callback is only called in case of exception by async jobs
         if self.__dbuser and self.__dbpass:
@@ -119,7 +121,7 @@ class Connection(object):
             self.__alive = True
         except socket.error as error:
             raise InterfaceError(error)
-    
+
     def _socket_close(self):
         """cleanup after the socket is closed by the other end"""
         callback = self.__callback
@@ -133,7 +135,7 @@ class Connection(object):
             self.__job_queue = []
             self.__alive = False
             self.__pool.cache(self)
-    
+
     def _close(self):
         """close the socket and cleanup"""
         callback = self.__callback
@@ -157,7 +159,7 @@ class Connection(object):
 
     def send_message(self, message, callback):
         """ send a message over the wire; callback=None indicates a safe=False call where we write and forget about it"""
-        
+
         if self.__callback is not None:
             raise ProgrammingError('connection already in use')
 
@@ -178,11 +180,11 @@ class Connection(object):
                 self.__connect(err_callback)
             else:
                 raise InterfaceError('connection invalid. autoreconnect=False')
-        
+
         # Put the current message on the bottom of the queue
         self._put_job(asyncjobs.AsyncMessage(self, message, callback), 0)
         self._next_job()
-        
+
     def _put_job(self, job, pos=None):
         if pos is None:
             pos = len(self.__job_queue)
@@ -195,13 +197,13 @@ class Connection(object):
             job = self.__job_queue.pop()
             # logging.debug("queue = %s, popped %r", self.__job_queue, job)
             job.process()
-    
+
     def _send_message(self, message, callback):
-        # logging.debug("_send_message, msg = %r: queue = %r, self.__callback = %r, callback = %r", 
+        # logging.debug("_send_message, msg = %r: queue = %r, self.__callback = %r, callback = %r",
         #               message, self.__job_queue, self.__callback, callback)
 
         self.__callback = callback
-        self.usage_count +=1
+        self.usage_count += 1
         # __request_id used by get_more()
         (self.__request_id, data) = message
         try:
@@ -211,12 +213,12 @@ class Connection(object):
             else:
                 self.__request_id = None
                 self.__pool.cache(self)
-        
+
         except IOError:
             self.__alive = False
             raise
-        # return self.__request_id 
-    
+        # return self.__request_id
+
     def _parse_header(self, header):
         # return self.__receive_data_on_socket(length - 16, sock)
         length = int(struct.unpack("<i", header[:4])[0])
@@ -224,14 +226,14 @@ class Connection(object):
         assert request_id == self.__request_id, \
             "ids don't match %r %r" % (self.__request_id,
                                        request_id)
-        operation = 1 # who knows why
+        operation = 1  # who knows why
         assert operation == struct.unpack("<i", header[12:])[0]
         try:
             self.__stream.read(length - 16, callback=self._parse_response)
         except IOError:
             self.__alive = False
             raise
-    
+
     def _parse_response(self, response):
         callback = self.__callback
         request_id = self.__request_id
@@ -244,12 +246,12 @@ class Connection(object):
             self.__pool.cache(self)
 
         try:
-            response = helpers._unpack_response(response, request_id) # TODO: pass tz_awar
+            response = helpers._unpack_response(response, request_id)  # TODO: pass tz_awar
         except Exception as e:
             logging.debug('error %s' % e)
             callback(None, e)
             return
-        
+
         if response and response['data'] and response['data'][0].get('err') and response['data'][0].get('code'):
             callback(response, IntegrityError(response['data'][0]['err'], code=response['data'][0]['code']))
             return
